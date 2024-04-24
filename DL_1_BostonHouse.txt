@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import Adam
+
+
+
+data = pd.read_csv("/content/BostonHousing.csv")
+data
+
+
+from sklearn.preprocessing import StandardScaler
+
+
+# Split features (X) and target (y)
+X = data.drop('medv', axis=1)
+Y = data['medv']
+
+
+# Normalize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+
+# Build the neural network model
+model = Sequential([
+    Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    Dropout(0.2),
+    Dense(32, activation='relu'),
+    Dense(1)  # Output layer with one neuron (for regression)
+])
+
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
+
+
+# Train the model
+model.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
+
+
+# Evaluate the model on test data
+loss = model.evaluate(X_test, y_test, verbose=0)
+print("Test Loss:", loss)

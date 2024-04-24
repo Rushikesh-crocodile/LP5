@@ -1,0 +1,79 @@
+import numpy as np
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.utils import to_categorical
+
+
+
+
+# Load the Fashion MNIST dataset
+(X_train, y_train), (X_test, y_test) = fashion_mnist.load_data()
+
+
+# Reshape and normalize the data
+X_train = X_train.reshape(X_train.shape[0], 28, 28, 1).astype('float32') / 255
+X_test = X_test.reshape(X_test.shape[0], 28, 28, 1).astype('float32') / 255
+
+
+
+# One-hot encode the target labels
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
+
+
+# Define the CNN model
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    MaxPooling2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(10, activation='softmax')  # Output layer with 10 neurons for 10 categories
+])
+
+
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+     
+
+
+# Train the model
+batch_size = 128
+epochs = 10
+model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test))
+     
+
+
+# Evaluate the model on test data
+loss, accuracy = model.evaluate(X_test, y_test)
+print("Test Loss:", loss)
+print("Test Accuracy:", accuracy)
+     
+
+
+# Make predictions on the test data
+predictions = model.predict(X_test)
+     
+
+
+# Convert predictions from one-hot encoded format to class labels
+predicted_labels = np.argmax(predictions, axis=1)
+
+
+
+
+# Convert true labels from one-hot encoded format to class labels
+true_labels = np.argmax(y_test, axis=1)
+
+
+
+# Print the predicted and true labels for the first 10 samples
+for i in range(10):
+    print("Sample", i+1)
+    print("Predicted Label:", predicted_labels[i])
+    print("True Label:", true_labels[i])
+    print()
+
